@@ -1,0 +1,4 @@
+﻿.homeStyle {
+    background: linear-gradient( to right, rgba(218, 235, 229, 0.8) 0%, rgba(68, 143, 99, 0.8) 40%, rgba(13, 135, 64, 0.8) 100% ), url("/wwwroot/images/NowPlayingBG.jpg");
+    color: var(--cf-title-color);
+}
