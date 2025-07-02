@@ -1,5 +1,7 @@
 ﻿@page "/popular";
 
+@inject TMDBService TMDBService;
+
 <PageTitle>Popular Movies</PageTitle>
 
 <div class="container-xxl py-3">
@@ -10,9 +12,51 @@
     <p class="lead italic">
         Movies that are currently popular with TMDB users.
     </p>
+
+    <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+        @if (popularMovies is null)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                @if (isLoading)
+                {
+                    <h2 class="text-muted">Loading Now Playing movies...</h2>
+                }
+                else
+                {
+                    <h2 class="text-muted">Failed to load Now Playing movies...</h2>
+                }
+            </div>
+        }
+        else
+        {
+            @foreach (var item in popularMovies.Results)
+            {
+                <div class="col">
+                    <MovieCard Movie="@item" />
+                </div>
+            }
+        }
+    </div>
 </div>
 
 
 @code {
+    private MovieListResponse? popularMovies;
+    private bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            popularMovies = await TMDBService.GetPopularMoviesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }

@@ -1,6 +1,6 @@
 ﻿@page "/now-playing";
-@inject HttpClient HttpClient;
-@inject IConfiguration Configuration;
+
+@inject TMDBService TMDBService;
 
 <PageTitle>Now Playing</PageTitle>
 
@@ -15,16 +15,49 @@
     </p>
 
     <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
-        @for (int i = 1; i < 20; i++)
+        @if (nowPlayingMovies is null)
         {
-            <div class="col">
-                <MovieCard />
+            <div class="d-flex justify-content-center align-items-center">
+                @if (isLoading)
+                {
+                    <h2 class="text-muted">Loading Now Playing movies...</h2>
+                }
+                else
+                {
+                    <h2 class="text-muted">Failed to load Now Playing movies...</h2>
+                }
             </div>
+        }
+        else
+        {
+            @foreach (var item in nowPlayingMovies.Results)
+            {
+                <div class="col">
+                    <MovieCard Movie="@item"/>
+                </div>
+            }
         }
     </div>
 </div>
 
 
 @code {
+    private MovieListResponse? nowPlayingMovies;
+    private bool isLoading = true;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            nowPlayingMovies = await TMDBService.GetNowPlayingMoviesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }
