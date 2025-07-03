@@ -57,7 +57,36 @@ namespace NowPlaying.Services
             string url = "https://api.themoviedb.org/3/movie/popular?region=CA&language=en-US";
 
             var response = await _httpClient.GetFromJsonAsync<MovieListResponse>(url, _jsonOptions)
-                ?? throw new HttpIOException(HttpRequestError.InvalidResponse, "Failed to fetch now playing movies.");
+                ?? throw new HttpIOException(HttpRequestError.InvalidResponse, "Failed to fetch popular movies.");
+
+            foreach (var movie in response.Results)
+            {
+                if (string.IsNullOrEmpty(movie.PosterPath))
+                {
+                    movie.PosterPath = "/images/poster.png"; // Default image if no poster is available
+                }
+                else
+                {
+                    movie.PosterPath = $"{imageBaseUrl}{movie.PosterPath}";
+                }
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Searches for movies based on the provided query.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        /// <exception cref="HttpIOException"></exception>
+        public async Task<MovieListResponse> SearchMovieAsync(string query)
+        {
+            string imageBaseUrl = "https://image.tmdb.org/t/p/w500";
+            string url = $"https://api.themoviedb.org/3/search/movie?query={query}&include_adult=false@language=en-us";
+
+            var response = await _httpClient.GetFromJsonAsync<MovieListResponse>(url, _jsonOptions)
+                ?? throw new HttpIOException(HttpRequestError.InvalidResponse, "Failed to fetch the movies.");
 
             foreach (var movie in response.Results)
             {

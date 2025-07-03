@@ -1,4 +1,6 @@
-﻿<nav class="navbar navbar-expand-lg navStyle" data-bs-theme="dark">
+﻿@inject NavigationManager NavigationManager;
+
+<nav class="navbar navbar-expand-lg navStyle" data-bs-theme="dark">
     <div class="container-xxl">
         <a href="/" class="me-3">
             <img src="/images/Logo.png" height="40"/>
@@ -35,6 +37,21 @@
                         </NavLink>
                 </li>
             </ul>
+            <form class="d-flex" role="search">
+                <InputText class="form-control form-control-sm me-2" type="search" placeholder="Search Movies.."
+                aria-label="Search" name ="" @bind-Value="searchQuery"/>
+                <button class="btn btn-sm btn-primary" type="button" @onclick="HandleSearch">Search</button>
+            </form>
         </div>
     </div>
 </nav>
+
+
+@code{
+    private string? searchQuery { get; set; }
+
+    public void HandleSearch()
+    {
+        NavigationManager.NavigateTo(string.IsNullOrEmpty(searchQuery) ? "search" : $"search?searchQuery={searchQuery}");
+    }
+}

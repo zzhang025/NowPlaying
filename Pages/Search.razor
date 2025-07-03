@@ -1,0 +1,84 @@
+﻿@page "/Search";
+
+@inject TMDBService TMDBService;
+
+<PageTitle>Search Movies</PageTitle>
+
+<div class="container-xxl py-3">
+    <h1>
+        <i class="bi bi-search text-secondary"></i>
+        Search Movies
+    </h1>
+    <p class="lead italic">
+        Movies that match your search.
+    </p>
+
+        @if (searchResults is null)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                @if (string.IsNullOrEmpty(searchQuery))
+                {
+                    <div class="d-flex justify-content-center align-items-center">
+                        <h2 class="text-muted">
+                            Use the search box at the top of the page to search for movies.
+                        </h2>
+                    </div>
+                }
+                else if (isLoading)
+                {
+                    <h2 class="text-muted">Loading movies...</h2>
+                }
+                else
+                {
+                    <h2 class="text-muted">Failed to load movies...</h2>
+                }
+            </div>
+        }
+        else
+        {
+            @if (searchResults.TotalResults == 0)
+            {
+                <div class="d-flex justify-content-center align-items-center py-5">
+                    <h2 class="text-muted">
+                        Couldn't find any movies matching your search query: <strong>@searchQuery</strong>
+                    </h2>
+                </div>
+            }
+                <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-lg-4">
+                    @foreach (var item in searchResults.Results)
+                    {
+                        <div class="col">
+                            <MovieCard Movie="@item" />
+                        </div>
+                    }
+                </div>
+        }
+</div>
+
+
+@code {
+    private MovieListResponse? searchResults;
+    private bool isLoading = true;
+
+    [SupplyParameterFromQuery]
+    private string? searchQuery { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                searchResults = await TMDBService.SearchMovieAsync(searchQuery);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching search results: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
