@@ -1,4 +1,6 @@
 ﻿
+@inject FavouriteService favouriteService;
+
 <div class="movieCard card h-100">
     <img src="@Movie.PosterPath" alt="Movie Poster" class="card-img-top" />
 
@@ -14,7 +16,9 @@
         </div>
     </div>
     <div class="movieCardFooter card-footer d-flex justify-content-between">
-        <button class="btn btn-outline-primary">Add Fav</button>
+        <button class="btn btn-outline-primary" @onclick="HandleToggleFavoriteAsync">
+            @(IsFavourite ? "Remove Fav" : "Add Fav ")
+        </button>
         <a href="moviedetail" class="btn btn-primary">More Info</a>
     </div>
 </div>
@@ -23,4 +27,39 @@
 @code {
     [Parameter, EditorRequired]
     public Movie? Movie { get; set; }
+
+    [Parameter]
+    public EventCallback OnChange { get; set; }
+
+    public bool IsFavourite;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Movie != null)
+        {
+            IsFavourite = await favouriteService.IsFavouriteAsync(Movie);
+        }
+    }
+
+    private async Task HandleToggleFavoriteAsync()
+    {
+        if (Movie == null)
+        {
+            return;   
+        }
+
+        // Toggle the favorite status of the movie
+        if (IsFavourite)
+        {
+            await favouriteService.RemoveFavouriteAsync(Movie);
+            IsFavourite = false;
+        }
+        else
+        {
+            await favouriteService.AddFavouriteAsync(Movie);
+            IsFavourite = true;
+        }
+
+        await OnChange.InvokeAsync();
+    }
 }

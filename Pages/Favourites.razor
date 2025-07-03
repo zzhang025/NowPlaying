@@ -1,5 +1,7 @@
 ﻿@page "/favourites";
 
+@inject FavouriteService favouriteService;
+
 <PageTitle>Favourites</PageTitle>
 
 <div class="container-xxl py-3">
@@ -10,9 +12,52 @@
     <p class="lead italic">
         Movies that you have added to your favourites.
     </p>
+
+    <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4">
+        @if (favouriteMovies is null)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                @if (isLoading)
+                {
+                    <h2 class="text-muted">Loading favourite movies...</h2>
+                }
+                else
+                {
+                    <h2 class="text-muted">Failed to load favourite movies...</h2>
+                }
+            </div>
+        }
+        else
+        {
+            @foreach (var item in favouriteMovies)
+            {
+                <div class="col">
+                    <MovieCard Movie="@item" OnChange="OnParametersSetAsync" />
+                </div>
+            }
+        }
+    </div>
 </div>
 
 
 @code {
+    List<Movie> favouriteMovies = new List<Movie>();
+    bool isLoading = true;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        // load the favourite from local storage service
+        try
+        {
+            favouriteMovies = await favouriteService.GetFavouritesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 }
